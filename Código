@@ -1,0 +1,205 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// ==================== LISTA ENCADEADA ====================
+struct HistoryNode {
+    string page;
+    HistoryNode* next;
+    HistoryNode(string p) : page(p), next(nullptr) {}
+};
+
+class HistoryList {
+    HistoryNode* head;
+public:
+    HistoryList() : head(nullptr) {}
+
+    void addPage(const string& page) {
+        HistoryNode* newNode = new HistoryNode(page);
+        if (!head) {
+            head = newNode;
+        } else {
+            HistoryNode* temp = head;
+            while (temp->next) temp = temp->next;
+            temp->next = newNode;
+        }
+    }
+
+    void display() const {
+        HistoryNode* temp = head;
+        cout << "\n Histórico de páginas acessadas:\n";
+        while (temp) {
+            cout << "- " << temp->page << endl;
+            temp = temp->next;
+        }
+    }
+
+    void clear() {
+        while (head) {
+            HistoryNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    ~HistoryList() {
+        clear();
+    }
+};
+
+// ==================== PILHA ====================
+struct StackNode {
+    string page;
+    StackNode* next;
+    StackNode(string p) : page(p), next(nullptr) {}
+};
+
+class Stack {
+    StackNode* top;
+public:
+    Stack() : top(nullptr) {}
+
+    void push(const string& page) {
+        StackNode* node = new StackNode(page);
+        node->next = top;
+        top = node;
+    }
+
+    string pop() {
+        if (isEmpty()) return "";
+        StackNode* temp = top;
+        string page = temp->page;
+        top = top->next;
+        delete temp;
+        return page;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    void clear() {
+        while (!isEmpty()) pop();
+    }
+
+    ~Stack() {
+        clear();
+    }
+};
+
+// ==================== SIMULADOR DE NAVEGADOR ====================
+class BrowserSimulator {
+    string currentPage;
+    Stack pilhaVoltar;
+    Stack pilhaAvancar;
+    HistoryList historico;
+
+public:
+    BrowserSimulator() : currentPage("Página Inicial") {
+        historico.addPage(currentPage);
+    }
+
+    void acessarNovaPagina(const string& novaPagina) {
+        pilhaVoltar.push(currentPage);
+        currentPage = novaPagina;
+        pilhaAvancar.clear();
+        historico.addPage(currentPage);
+        cout << " Página atual: " << currentPage << endl;
+    }
+
+    void voltar() {
+        if (pilhaVoltar.isEmpty()) {
+            cout << "Não há páginas anteriores para voltar.\n";
+            return;
+        }
+        pilhaAvancar.push(currentPage);
+        currentPage = pilhaVoltar.pop();
+        cout << " Voltou para: " << currentPage << endl;
+    }
+
+    void avancar() {
+        if (pilhaAvancar.isEmpty()) {
+            cout << "Não há páginas seguintes para avançar.\n";
+            return;
+        }
+        pilhaVoltar.push(currentPage);
+        currentPage = pilhaAvancar.pop();
+        cout << " Avançou para: " << currentPage << endl;
+    }
+    void exibirHistorico() const {
+        historico.display();
+    }
+    void limparMemoria() {
+        pilhaVoltar.clear();
+        pilhaAvancar.clear();
+    }
+    ~BrowserSimulator() {
+        limparMemoria();
+    }
+};
+// ==================== FUNÇÃO PRINCIPAL ====================
+void mostrarCatalogo() {
+    cout << "\n Catálogo de Receitas Disponíveis:\n";
+    cout << "1. Torta\n";
+    cout << "2. Bolo\n";
+    cout << "3. Arroz\n";
+    cout << "4. Frango Cozido\n";
+    cout << "Escolha uma receita (1-4): ";
+}
+
+string escolherReceita(int opcao) {
+    switch (opcao) {
+        case 1: return "Torta";
+        case 2: return "Bolo";
+        case 3: return "Arroz";
+        case 4: return "Frango Cozido";
+        default: return "";
+    }
+}
+
+int main() {
+    BrowserSimulator navegador;
+    int opcao;
+
+    do {
+        cout << "\n========== NAVEGADOR DE RECEITAS ==========\n";
+        cout << "1. Acessar nova página de receita\n";
+        cout << "2. Voltar\n";
+        cout << "3. Avançar\n";
+        cout << "4. Exibir histórico\n";
+        cout << "5. Sair\n";
+        cout << "Escolha uma opção: ";
+        cin >> opcao;
+
+        switch (opcao) {
+            case 1: {
+                int escolha;
+                mostrarCatalogo();
+                cin >> escolha;
+                string receita = escolherReceita(escolha);
+                if (receita != "")
+                    navegador.acessarNovaPagina(receita);
+                else
+                    cout << " Receita inválida.\n";
+                break;
+            }
+            case 2:
+                navegador.voltar();
+                break;
+            case 3:
+                navegador.avancar();
+                break;
+            case 4:
+                navegador.exibirHistorico();
+                break;
+            case 5:
+                cout << "Limpando memória e saindo...\n";
+                break;
+            default:
+                cout << "Opção inválida. Tente novamente.\n";
+        }
+
+    } while (opcao != 5);
+
+    return 0;
+}
