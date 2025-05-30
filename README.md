@@ -1,4 +1,5 @@
 Simulador de Navegador Web 
+
 Este projeto em C++ simula o funcionamento básico de um navegador web com foco em receitas culinárias, utilizando estrutura de dados como pilhas e listas encadeadas.
 
 📚 Funcionalidades
